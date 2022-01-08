@@ -1,0 +1,60 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "20220108",
+    "Parameters": {
+        "LatestS3Bucket": {
+            "Type": "String"
+        },
+        "LatestS3Key": {
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "WineCollectorLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "enoteca_wine_collector",
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "LatestS3Bucket"
+                    },
+                    "S3Key": {
+                        "Ref": "LatestS3Key"
+                    }
+                },
+                "Description": "create by codepipeline",
+                "Handler": "lambda_function.lambda_handler",
+                "Role": "arn:aws:iam::811231261912:role/service-role/lambda_basic_execution",
+                "Runtime": "python3.7",
+                "Timeout": 10,
+                "MemorySize": 128
+            }
+        },
+        "WineCollectEvent": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+                "Description": "Triggering EOD job for GarbageDayNotificaiton",
+                "Name": "GarbageDayNotificaitonEODEvent",
+                "ScheduleExpression": "cron(0 12 * * ? *)",
+                "State": "ENABLED",
+                "Targets": [{
+                    "Arn": "arn:aws:lambda:us-east-2:811231261912:function:enoteca_wine_collector",
+                    "Id": "enoteca_wine_collector"
+                }]
+            }
+        },
+        "WineCollectorPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": "enoteca_wine_collector",
+                "Principal": "events.amazonaws.com",
+                "SourceArn": {
+                    "Fn::GetAtt": [
+                        "MyEvent", "Arn"
+                    ]
+                }
+            }
+        }
+    }
+}
