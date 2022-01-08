@@ -33,8 +33,8 @@
         "WineCollectEvent": {
             "Type": "AWS::Events::Rule",
             "Properties": {
-                "Description": "Triggering EOD job for GarbageDayNotificaiton",
-                "Name": "GarbageDayNotificaitonEODEvent",
+                "Description": "Triggering EOD job for WineCollect to collect wine lists from enoteca",
+                "Name": "WineCollectEvent",
                 "ScheduleExpression": "cron(0 12 * * ? *)",
                 "State": "ENABLED",
                 "Targets": [{
@@ -51,7 +51,7 @@
                 "Principal": "events.amazonaws.com",
                 "SourceArn": {
                     "Fn::GetAtt": [
-                        "MyEvent", "Arn"
+                        "WineCollectEvent", "Arn"
                     ]
                 }
             }
